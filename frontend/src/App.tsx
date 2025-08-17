@@ -1,13 +1,33 @@
-// src/App.tsx
-import React from "react";
+// frontend/src/App.tsx
+import React, { useState, useEffect } from "react";
+import Login from "./Login";
+import Todos from "./Todos"; // Import the new Todos component
+import "./global.css";
 
 function App() {
-    // This will be our main application component
-    // For now, it's just a placeholder
+    const [token, setToken] = useState<string | null>(null);
+
+    useEffect(() => {
+        const storedToken = localStorage.getItem("token");
+        if (storedToken) {
+            setToken(storedToken);
+        }
+    }, []);
+
+    const handleLoginSuccess = (newToken: string) => {
+        setToken(newToken);
+        localStorage.setItem("token", newToken);
+    };
+
     return (
         <div className="container">
-            <h1>Welcome to QuickList!</h1>
-            <p>Frontend setup complete. Ready to build components.</p>
+            {token ? (
+                // If we have a token, render the Todos component
+                <Todos token={token} />
+            ) : (
+                // If no token, render the login component
+                <Login onLoginSuccess={handleLoginSuccess} />
+            )}
         </div>
     );
 }

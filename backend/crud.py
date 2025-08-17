@@ -36,3 +36,14 @@ def get_todos(db: Session, user_id: int):
     Retrieves all to-do items for a specific user.
     """
     return db.query(models.ToDo).filter(models.ToDo.owner_id == user_id).all()
+
+def delete_todo(db: Session, todo_id: int):
+    """
+    Deletes a to-do item from the database.
+    """
+    db_todo = db.query(models.ToDo).filter(models.ToDo.id == todo_id).first()
+    if db_todo:
+        db.delete(db_todo)
+        db.commit()
+        return True
+    return False
