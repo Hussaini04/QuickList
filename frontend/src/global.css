@@ -1,0 +1,67 @@
+/* src/global.css - Global styles for QuickList */
+:root {
+    /* Define primary color palette */
+    --primary-color: #4caf50; /* Green for success/primary actions */
+    --secondary-color: #2196f3; /* Blue for secondary actions */
+    --text-color: #333; /* Dark text for readability */
+    --background-color: #f4f4f4; /* Light background */
+    --border-color: #ddd; /* Light border for elements */
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: "Inter", sans-serif; /* Using Inter as requested or a good sans-serif fallback */
+    background-color: var(--background-color);
+    color: var(--text-color);
+    line-height: 1.6;
+    display: flex; /* Use flexbox for centering */
+    justify-content: center; /* Center horizontally */
+    align-items: flex-start; /* Align to top, adjust if vertical centering desired */
+    min-height: 100vh; /* Full viewport height */
+}
+
+/* Basic button styling */
+button {
+    background-color: var(--primary-color);
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 8px; /* Rounded corners for buttons */
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background-color: #45a049; /* Slightly darker green on hover */
+}
+
+/* Input field styling */
+input[type="email"],
+input[type="password"],
+input[type="text"],
+textarea {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px; /* Rounded corners for inputs */
+    font-size: 16px;
+    box-sizing: border-box; /* Include padding and border in the element's total width and height */
+}
+
+textarea {
+    resize: vertical; /* Allow vertical resizing for textareas */
+    min-height: 80px;
+}
+
+/* Card/Box Styling (for to-do items) */
+.card {
+    background-color: #fff;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
