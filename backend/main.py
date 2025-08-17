@@ -2,16 +2,28 @@
 from fastapi import FastAPI, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
+from fastapi.middleware.cors import CORSMiddleware  # Import CORSMiddleware
 
+# Import our database, schemas, and CRUD functions
 from database import SessionLocal
-import crud
-import schemas
-import auth
-
-# We need to import our new dependency
-from auth import get_current_user
+import crud, schemas, auth
 
 app = FastAPI()
+
+# Configure CORS settings
+origins = [
+    "http://localhost",
+    "http://localhost:5173",  # The origin of your React app
+]
+
+# Add the CORS middleware to the application
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,  # Allow requests from these origins
+    allow_credentials=True, # Allow cookies and authorization headers
+    allow_methods=["*"],    # Allow all HTTP methods (GET, POST, PUT, DELETE, etc.)
+    allow_headers=["*"],    # Allow all headers
+)
 
 # Dependency for managing database sessions
 def get_db():
@@ -66,7 +78,7 @@ def login_for_access_token(
 @app.post("/todos/", response_model=schemas.ToDo, status_code=status.HTTP_201_CREATED)
 def create_todo_for_current_user(
     todo: schemas.ToDoCreate,
-    current_user: schemas.User = Depends(get_current_user),
+    current_user: schemas.User = Depends(auth.get_current_user),
     db: Session = Depends(get_db)
 ):
     """
@@ -76,7 +88,7 @@ def create_todo_for_current_user(
 
 @app.get("/todos/", response_model=list[schemas.ToDo])
 def read_todos_for_current_user(
-    current_user: schemas.User = Depends(get_current_user),
+    current_user: schemas.User = Depends(auth.get_current_user),
     db: Session = Depends(get_db)
 ):
     """
