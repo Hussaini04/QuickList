@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 from fastapi.middleware.cors import CORSMiddleware
 
 # Import our database, schemas, and CRUD functions
+import models
 from database import SessionLocal
 import crud
 import schemas
