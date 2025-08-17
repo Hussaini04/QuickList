@@ -33,7 +33,17 @@ class UserCreate(UserBase):
 class User(UserBase):
     id: int
     is_active: bool
-    todos: list[ToDo] = []
+    # This relationship indicates that a User object can include a list of ToDo objects.
+    # We set a default empty list to handle cases where a user has no todos.
+    todos: list['ToDo'] = [] # Forward reference 'ToDo' for type hinting
 
+    # Pydantic's Config class allows for additional configuration.
     class Config:
+        # `from_attributes = True` (formerly `orm_mode = True`) tells Pydantic to
+        # read data directly from ORM models (like SQLAlchemy models).
         from_attributes = True
+
+# Schema for authentication tokens, used for login and signup responses.
+class Token(BaseModel):
+    access_token: str
+    token_type: str
