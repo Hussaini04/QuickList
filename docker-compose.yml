@@ -1,17 +1,49 @@
+# docker-compose.yml
+
+# Specifies the Docker Compose file format version.
 version: "3.8"
 
+# Defines the services (containers) for our application.
 services:
+    # The 'db' service is our PostgreSQL database.
     db:
+        # We use the official PostgreSQL image, version 14. 'alpine' is a lightweight version.
         image: postgres:14-alpine
+        # This ensures the container automatically restarts if it fails.
         restart: always
+        # Environment variables to configure our PostgreSQL database.
         environment:
+            # Sets the database user.
             POSTGRES_USER: quicklist_user
+            # Sets the user's password.
             POSTGRES_PASSWORD: quicklist_password
+            # Sets the default database name.
             POSTGRES_DB: quicklist_db
+        # Maps the container's internal port 5432 to the host's port 5432.
         ports:
             - "5432:5432"
+        # Persists the database data to a named volume on the host machine.
         volumes:
             - db_data:/var/lib/postgresql/data
 
+    # The 'pgadmin' service is a web-based GUI for managing our database.
+    pgadmin:
+        # Uses the official pgAdmin image.
+        image: dpage/pgadmin4
+        # Ensures the container automatically restarts.
+        restart: always
+        # Environment variables to set the default login credentials for pgAdmin.
+        environment:
+            PGADMIN_DEFAULT_EMAIL: admin@quicklist.com
+            PGADMIN_DEFAULT_PASSWORD: admin
+        # Maps the container's internal port 80 to the host's port 5050.
+        ports:
+            - "5050:80"
+        # Specifies that the 'db' service must be running before pgAdmin starts.
+        depends_on:
+            - db
+
+# Defines named volumes for data persistence.
 volumes:
+    # The 'db_data' volume is where our PostgreSQL data will be stored.
     db_data:
