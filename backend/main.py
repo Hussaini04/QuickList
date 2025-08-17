@@ -2,16 +2,29 @@
 from fastapi import FastAPI, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
+from fastapi.middleware.cors import CORSMiddleware  # Import CORSMiddleware
 
+# Import our database, schemas, and CRUD functions
+import models
 from database import SessionLocal
-import crud
-import schemas
-import auth
-
-# We need to import our new dependency
-from auth import get_current_user
+import crud, schemas, auth
 
 app = FastAPI()
+
+# Configure CORS settings
+origins = [
+    "http://localhost",
+    "http://localhost:5173",  # The origin of your React app
+]
+
+# Add the CORS middleware to the application
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,  # Allow requests from these origins
+    allow_credentials=True, # Allow cookies and authorization headers
+    allow_methods=["*"],    # Allow all HTTP methods (GET, POST, PUT, DELETE, etc.)
+    allow_headers=["*"],    # Allow all headers
+)
 
 # Dependency for managing database sessions
 def get_db():
@@ -66,7 +79,7 @@ def login_for_access_token(
 @app.post("/todos/", response_model=schemas.ToDo, status_code=status.HTTP_201_CREATED)
 def create_todo_for_current_user(
     todo: schemas.ToDoCreate,
-    current_user: schemas.User = Depends(get_current_user),
+    current_user: schemas.User = Depends(auth.get_current_user),
     db: Session = Depends(get_db)
 ):
     """
@@ -76,7 +89,7 @@ def create_todo_for_current_user(
 
 @app.get("/todos/", response_model=list[schemas.ToDo])
 def read_todos_for_current_user(
-    current_user: schemas.User = Depends(get_current_user),
+    current_user: schemas.User = Depends(auth.get_current_user),
     db: Session = Depends(get_db)
 ):
     """
@@ -84,3 +97,28 @@ def read_todos_for_current_user(
     """
     todos = crud.get_todos(db, user_id=current_user.id)
     return todos
+
+@app.delete("/todos/{todo_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_todo_for_current_user(
+    todo_id: int,
+    current_user: schemas.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Deletes a to-do item for the authenticated user.
+    """
+    # Verify the to-do item belongs to the authenticated user
+    db_todo = db.query(models.ToDo).filter(
+        models.ToDo.id == todo_id,
+        models.ToDo.owner_id == current_user.id
+    ).first()
+
+    if not db_todo:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="To-do item not found or does not belong to the user"
+        )
+    
+    crud.delete_todo(db, todo_id)
+    # The 204 status code signifies a successful deletion with no content to return.
+    return {"message": "To-do item deleted successfully"}
