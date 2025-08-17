@@ -1,7 +1,11 @@
 // frontend/src/Todos.tsx
 import React, { useState, useEffect } from "react";
-import TodoForm from "./TodoForm"; // Import our new form
+import { useSelector } from "react-redux";
+import type { RootState } from "./app/store";
+import TodoForm from "./TodoForm"; // Import our form
 import styles from "./Todos.module.css"; // Use CSS Modules
+
+const API_URL = "http://localhost:8000";
 
 interface ToDo {
     id: number;
@@ -11,24 +15,33 @@ interface ToDo {
     owner_id: number;
 }
 
-interface TodosProps {
-    token: string;
-}
+// NOTE: We no longer need TodosProps because we will get the token from Redux.
+// interface TodosProps {
+//     token: string;
+// }
 
-const API_URL = "http://localhost:8000";
+// The `Todos` component no longer accepts `token` as a prop.
+const Todos: React.FC = () => {
+    // We get the token directly from our Redux store using the useSelector hook.
+    // This is the core change that connects this component to our central state.
+    const token = useSelector((state: RootState) => state.auth.token);
 
-const Todos: React.FC<TodosProps> = ({ token }) => {
+    // The `useState` hook for the todo list remains, as this is local UI state.
     const [todos, setTodos] = useState<ToDo[]>([]);
 
-    // Fetch todos on component mount and whenever the token changes
+    // This effect runs whenever the `token` from Redux changes.
     useEffect(() => {
-        fetchTodos();
+        // We only try to fetch todos if a token exists.
+        if (token) {
+            fetchTodos();
+        }
     }, [token]);
 
     const fetchTodos = async () => {
         try {
             const response = await fetch(`${API_URL}/todos/`, {
                 headers: {
+                    // We now use the `token` variable from the Redux store.
                     Authorization: `Bearer ${token}`,
                 },
             });
@@ -47,6 +60,7 @@ const Todos: React.FC<TodosProps> = ({ token }) => {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
+                    // We now use the `token` variable from the Redux store.
                     Authorization: `Bearer ${token}`,
                 },
                 body: JSON.stringify({ title, description }),
@@ -64,6 +78,7 @@ const Todos: React.FC<TodosProps> = ({ token }) => {
             const response = await fetch(`${API_URL}/todos/${todoId}`, {
                 method: "DELETE",
                 headers: {
+                    // We now use the `token` variable from the Redux store.
                     Authorization: `Bearer ${token}`,
                 },
             });
@@ -81,6 +96,7 @@ const Todos: React.FC<TodosProps> = ({ token }) => {
         }
     };
 
+    // The rest of the return statement (JSX) is unchanged.
     return (
         <div className={styles.container}>
             <h2>Your To-Dos</h2>
